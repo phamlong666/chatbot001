@@ -69,7 +69,7 @@ def handle_lanh_dao():
         st.error(f"Lỗi khi xử lý dữ liệu lãnh đạo xã: {e}")
     return False
 
-# --- Sẽ bổ sung: handle_tba() ---
+# --- TBA theo đường dây ---
 def handle_tba():
     if "tba" in question.lower() and "đường dây" in question.lower():
         try:
