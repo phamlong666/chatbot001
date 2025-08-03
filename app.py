@@ -30,7 +30,8 @@ st.markdown("""
 # Cập nhật đoạn code này để sử dụng Credentials từ google.oauth2
 try:
     scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-    creds_info = st.secrets["gspread"]
+    # Sao chép secrets vào một biến có thể chỉnh sửa
+    creds_info = st.secrets["gspread"].to_dict()
     
     # Xử lý trường private_key để đảm bảo định dạng đúng
     creds_info['private_key'] = creds_info['private_key'].replace('\\n', '\n')
