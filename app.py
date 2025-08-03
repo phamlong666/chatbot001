@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import gspread
-# Cập nhật thư viện để kết nối Google Sheets
-from google.oauth2.service_account import Credentials
+from oauth2client.service_account import ServiceAccountCredentials
 from difflib import get_close_matches
 import json
 from PIL import Image
@@ -13,40 +12,25 @@ import re
 st.set_page_config(page_title="Chatbot Phạm Hồng Long", layout="centered")
 
 # --- Hiển thị logo ---
-# Đảm bảo bạn đã có file "logo_hinh_tron.png" trong thư mục
-try:
-    logo = Image.open("logo_hinh_tron.png")
-    st.image(logo, width=200)
-except FileNotFoundError:
-    st.warning("Không tìm thấy file 'logo_hinh_tron.png'.")
-    st.markdown("<h1 style='text-align: center; color: orange;'>🤖 Chatbot PHẠM HỒNG LONG</h1>", unsafe_allow_html=True)
-
+logo = Image.open("logo_hinh_tron.png")
+st.image(logo, width=200)
 st.markdown("""
 <h1 style='text-align: center; color: orange;'>🤖 Chatbot PHẠM HỒNG LONG</h1>
 <h4 style='text-align: center; color: gray;'>Trợ lý hỏi – đáp dữ liệu tự động</h4>
 """, unsafe_allow_html=True)
 
 # --- Kết nối Google Sheets ---
-# Cập nhật đoạn code này để sử dụng Credentials từ google.oauth2
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 try:
-    scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-    # Sao chép secrets vào một biến có thể chỉnh sửa
-    creds_info = st.secrets["gspread"].to_dict()
-    
-    # Xử lý trường private_key để đảm bảo định dạng đúng
-    creds_info['private_key'] = creds_info['private_key'].replace('\\n', '\n')
-    
-    creds = Credentials.from_service_account_info(creds_info, scopes=scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gspread"], scope)
     client = gspread.authorize(creds)
     sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/13MqQzvV3Mf9bLOAXwICXclYVQ-8WnvBDPAR8VJfOGJg")
     worksheet = sheet.worksheet("Hỏi-Trả lời")
-
-    # --- Tải dữ liệu hỏi – đáp ---
     data = worksheet.get_all_records()
     df = pd.DataFrame(data)
 except Exception as e:
-    st.error(f"Lỗi khi kết nối Google Sheets: {e}")
-    st.stop() # Dừng ứng dụng nếu không thể kết nối
+    st.error(f"❌ Lỗi kết nối Google Sheets: {e}")
+    st.stop()
 
 with open("sample_questions.json", "r", encoding="utf-8") as f:
     sample_questions = json.load(f)
@@ -59,8 +43,8 @@ question = st.text_input("💬 Nhập câu hỏi của bạn")
 
 # --- Tra lãnh đạo xã ---
 def handle_lanh_dao():
-    if "lãnh đạo" in question.lower() and any(xa in question.lower() for xa in ["định hóa", "kim phượng", "phượng tiến", "trung hội", "bình yên", "phú đình", "bình thành", "lam vỹ"]):
-        try:
+    try:
+        if "lãnh đạo" in question.lower() and any(xa in question.lower() for xa in ["định hóa", "kim phượng", "phượng tiến", "trung hội", "bình yên", "phú đình", "bình thành", "lam vỹ"]):
             sheet_ld = sheet.worksheet("Danh sách lãnh đạo xã, phường")
             df_ld = pd.DataFrame(sheet_ld.get_all_records())
 
@@ -83,8 +67,8 @@ def handle_lanh_dao():
                 st.success(f"📋 Danh sách lãnh đạo xã/phường {ten_xa}")
                 st.dataframe(df_loc.reset_index(drop=True))
             return True
-        except Exception as e:
-            st.error(f"Lỗi khi xử lý dữ liệu lãnh đạo xã: {e}")
+    except Exception as e:
+        st.error(f"Lỗi khi xử lý dữ liệu lãnh đạo xã: {e}")
     return False
 
 # --- TBA theo đường dây ---
