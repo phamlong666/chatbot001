@@ -21,7 +21,7 @@ st.markdown("""
 
 # --- Kết nối Google Sheets ---
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("sotaygpt-a62c7a821ff3.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gspread"], scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/13MqQzvV3Mf9bLOAXwICXclYVQ-8WnvBDPAR8VJfOGJg")
 worksheet = sheet.worksheet("Hỏi-Trả lời")
