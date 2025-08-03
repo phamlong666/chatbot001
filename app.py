@@ -30,7 +30,12 @@ st.markdown("""
 # Cập nhật đoạn code này để sử dụng Credentials từ google.oauth2
 try:
     scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-    creds = Credentials.from_service_account_info(st.secrets["gspread"], scopes=scope)
+    creds_info = st.secrets["gspread"]
+    
+    # Xử lý trường private_key để đảm bảo định dạng đúng
+    creds_info['private_key'] = creds_info['private_key'].replace('\\n', '\n')
+    
+    creds = Credentials.from_service_account_info(creds_info, scopes=scope)
     client = gspread.authorize(creds)
     sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/13MqQzvV3Mf9bLOAXwICXclYVQ-8WnvBDPAR8VJfOGJg")
     worksheet = sheet.worksheet("Hỏi-Trả lời")
