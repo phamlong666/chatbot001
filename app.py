@@ -22,11 +22,9 @@ st.markdown("""
 # --- Kết nối Google Sheets ---
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 try:
-    from copy import deepcopy
-    gspread_secrets = deepcopy(st.secrets["gspread"])
+    gspread_secrets = dict(st.secrets["gspread"])
     raw_key = gspread_secrets["private_key"]
-    if isinstance(raw_key, str) and "\\n" in raw_key:
-        gspread_secrets["private_key"] = raw_key.replace("\\n", "\n")
+    gspread_secrets["private_key"] = raw_key.replace("\n", "\n") if "\\n" in raw_key else raw_key
 
     creds = ServiceAccountCredentials.from_json_keyfile_dict(gspread_secrets, scope)
     client = gspread.authorize(creds)
