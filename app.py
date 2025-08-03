@@ -24,8 +24,9 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 try:
     gspread_secrets = dict(st.secrets["gspread"])
     raw_key = gspread_secrets["private_key"]
-    gspread_secrets["private_key"] = raw_key.replace("\n", "\n") if "\\n" in raw_key else raw_key
-
+    # Đảm bảo private_key đúng định dạng
+    if "\\n" in raw_key:
+        gspread_secrets["private_key"] = raw_key.replace("\\n", "\n")
     creds = ServiceAccountCredentials.from_json_keyfile_dict(gspread_secrets, scope)
     client = gspread.authorize(creds)
     sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/13MqQzvV3Mf9bLOAXwICXclYVQ-8WnvBDPAR8VJfOGJg")
