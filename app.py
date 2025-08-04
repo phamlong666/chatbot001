@@ -7,6 +7,8 @@ import json
 from PIL import Image
 import matplotlib.pyplot as plt
 import re
+import base64
+import os
 
 # --- Cấu hình trang ---
 st.set_page_config(page_title="Chatbot Phạm Hồng Long", layout="centered")
@@ -19,12 +21,16 @@ st.markdown("""
 <h4 style='text-align: center; color: gray;'>Trợ lý hỏi – đáp dữ liệu tự động</h4>
 """, unsafe_allow_html=True)
 
-# --- Kết nối Google Sheets ---
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+# --- Giải mã KEY bí mật an toàn ---
 try:
-    gspread_secrets = dict(st.secrets["gspread"])
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(gspread_secrets, scope)
+    key_json = st.secrets["gspread_secret"]
+    key_decoded = base64.b64decode(key_json).decode("utf-8")
+    key_dict = json.loads(key_decoded)
+
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(key_dict, scope)
     client = gspread.authorize(creds)
+
     sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/13MqQzvV3Mf9bLOAXwICXclYVQ-8WnvBDPAR8VJfOGJg")
     worksheet = sheet.worksheet("Hỏi-Trả lời")
     data = worksheet.get_all_records()
@@ -33,6 +39,7 @@ except Exception as e:
     st.error(f"❌ Lỗi kết nối Google Sheets: {e}")
     st.stop()
 
+# --- Hiển thị gợi ý câu hỏi ---
 with open("sample_questions.json", "r", encoding="utf-8") as f:
     sample_questions = json.load(f)
 
