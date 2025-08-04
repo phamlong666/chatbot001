@@ -24,7 +24,6 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 try:
     gspread_secrets = dict(st.secrets["gspread"])
     raw_key = gspread_secrets["private_key"]
-    # Đảm bảo private_key đúng định dạng
     if "\\n" in raw_key:
         gspread_secrets["private_key"] = raw_key.replace("\\n", "\n")
     creds = ServiceAccountCredentials.from_json_keyfile_dict(gspread_secrets, scope)
